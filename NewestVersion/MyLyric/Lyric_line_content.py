@@ -1,8 +1,8 @@
 from typing import Optional, Pattern, Self
 from collections import UserList
 
-from .Lyric_Time_tab import Lyric_Time_tab
-from .Lyric_character import Lyric_character
+from .LyricTimeTab import LyricTimeTab
+from .LyricCharacter import LyricCharacter
 import re
 
 
@@ -40,17 +40,17 @@ class Lyric_line_content(UserList):
         self._time_char_list: list[list[str, str]] = Lyric_line_content.split_line_to_time_and_char(line,
                                                                                                     separation_mode)
         # 时间字符对象列表
-        self.time_char_object_list: list[Lyric_character] = []
+        self.time_char_object_list: list[LyricCharacter] = []
 
         # 先转为Time_tab对象
         # 再转为Lrc_character对象
         # 再添加到有序字典中
         for time_char in self._time_char_list:
-            each_time_tab_object: Lyric_Time_tab = Lyric_Time_tab(time_char[0],
-                                                                  separation_mode)
+            each_time_tab_object: LyricTimeTab = LyricTimeTab(time_char[0],
+                                                              separation_mode)
 
-            each_char_object: Lyric_character = Lyric_character(time_char[1],
-                                                                each_time_tab_object)
+            each_char_object: LyricCharacter = LyricCharacter(time_char[1],
+                                                              each_time_tab_object)
 
             self.time_char_object_list.append(each_char_object)
 
@@ -234,19 +234,19 @@ class Lyric_line_content(UserList):
 
         # 严格模式 根据Time_tab类的正则表达式分离
         if separation_mode == "strict":
-            SEPARATION_PATTERN = Lyric_Time_tab.TIME_TAB_EACH_WORD_STRICT_REGREX
+            SEPARATION_PATTERN = LyricTimeTab.TIME_TAB_STRICT_REGREX
 
         # 普通模式 根据Time_tab类的正则表达式分离
         elif separation_mode == "normal":
-            SEPARATION_PATTERN = Lyric_Time_tab.TIME_TAB_EACH_WORD_NORMAL_REGREX
+            SEPARATION_PATTERN = LyricTimeTab.TIME_TAB_NORMAL_REGREX
 
         # 宽松模式 根据Time_tab类的正则表达式分离
         elif separation_mode == "loose":
-            SEPARATION_PATTERN = Lyric_Time_tab.TIME_TAB_EACH_WORD_LOOSE_REGREX
+            SEPARATION_PATTERN = LyricTimeTab.TIME_TAB_LOOSE_REGREX
 
         # 非常宽松模式 根据Time_tab类的正则表达式分离
         elif separation_mode == "very_loose":
-            SEPARATION_PATTERN = Lyric_Time_tab.TIME_TAB_EACH_WORD_VERY_LOOSE_REGREX
+            SEPARATION_PATTERN = LyricTimeTab.TIME_TAB_VERY_LOOSE_REGREX
 
         # 输入不合法
         else:
@@ -384,7 +384,7 @@ class Lyric_line_content(UserList):
         # 逐字检查
         for index, char in enumerate(line):
             # 如果是汉字或者喃字，那么添加到结果列表中
-            if Lyric_character.is_chinese_or_chu_nom_or_chinese_radical_staticmethod(char):
+            if LyricCharacter.is_CJKV_staticmethod(char):
                 result.append([char, index])
 
         # 返回结果
@@ -414,7 +414,7 @@ class Lyric_line_content(UserList):
 
         # 提取字符串
         for index, character in enumerate(self):
-            if Lyric_character.is_chinese_or_chu_nom_or_chinese_radical_staticmethod(str(character)):
+            if LyricCharacter.is_CJKV_staticmethod(str(character)):
                 result.append([character, index])
 
         return result
@@ -426,7 +426,7 @@ class Lyric_line_content(UserList):
                        ) -> str:
         output_str: str = ""
         for each_lyric_character in self:
-            each_lyric_character: Lyric_character
+            each_lyric_character: LyricCharacter
 
             each_time_tab = each_lyric_character.time_tab
             each_time_tab_str = each_time_tab.convert_to_time_tab(len_of_millisecond_output=len_of_millisecond_output,

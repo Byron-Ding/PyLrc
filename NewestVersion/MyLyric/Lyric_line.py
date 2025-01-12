@@ -1,17 +1,17 @@
 from typing import Optional, Self
-from .Lyric_Time_tab import Lyric_Time_tab
+from .LyricTimeTab import LyricTimeTab
 from .Lyric_line_content import Lyric_line_content
 
 
 class Lyric_line:
 
     def __init__(self,
-                 time_tab_list: Optional[list[Lyric_Time_tab]],
+                 time_tab_list: Optional[list[LyricTimeTab]],
                  lyric_content_list: list[Lyric_line_content]):
 
         # 歌词标签，用于适应多行合并的歌词
         # 自动排序
-        self.time_tabs: Optional[list[Lyric_Time_tab]] = sorted(time_tab_list)
+        self.time_tabs: Optional[list[LyricTimeTab]] = sorted(time_tab_list)
 
         # 向后兼容，用列表存储
         self.lyric_contents: list[Lyric_line_content] = lyric_content_list
@@ -44,7 +44,7 @@ class Lyric_line:
         # 加个时间头输出
         return str(self.time_tabs[item]) + lyric_contents_str
 
-    def __setitem__(self, key, value: Lyric_Time_tab):
+    def __setitem__(self, key, value: LyricTimeTab):
         self.time_tabs[key] = value
 
     def __delitem__(self, key):
@@ -69,7 +69,7 @@ class Lyric_line:
 
             yield time_tab + lyric_contents_str
 
-    def __contains__(self, item: Lyric_Time_tab):
+    def __contains__(self, item: LyricTimeTab):
         return item in self.time_tabs
 
     # 大小比较，以第一个时间标签为准
@@ -189,11 +189,11 @@ class Lyric_line:
 if __name__ == '__main__':
     # 测试
     # 新定义几个时间标签
-    time_tab1 = Lyric_Time_tab("[00:00.00]")
-    time_tab2 = Lyric_Time_tab("[00:01.00]")
-    time_tab3 = Lyric_Time_tab("[00:02.00]")
-    time_tab4 = Lyric_Time_tab("[00:03.00]")
-    time_tab5 = Lyric_Time_tab("[00:04.00]")
+    time_tab1 = LyricTimeTab("[00:00.00]")
+    time_tab2 = LyricTimeTab("[00:01.00]")
+    time_tab3 = LyricTimeTab("[00:02.00]")
+    time_tab4 = LyricTimeTab("[00:03.00]")
+    time_tab5 = LyricTimeTab("[00:04.00]")
 
     # 新定义几个歌词内容
     lyric_content1 = Lyric_line_content("歌词1")

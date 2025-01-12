@@ -11,7 +11,7 @@ class Lyric_content:
         self.is_extend = False
 
         # 扩展歌词每个部分的时间列表
-        self.extend_time: list[list[Lyric_Time_tab.Lyric_Time_tab, str]] = []
+        self.extend_time: list[list[Lyric_Time_tab.LyricTimeTab, str]] = []
 
         # 预分离
         self.pre_separate(content)

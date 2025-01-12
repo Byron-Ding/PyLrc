@@ -1,8 +1,11 @@
+import datetime
+
 import pytest
 from NewestVersion.MyLyric.LyricTimeTab import LyricTimeTab
 
 
 standard_init_time_tab: str = "[00:00.00]"
+
 
 def test_LyricTimeTab_propertyDecorated_property():
     """
@@ -33,6 +36,22 @@ def test_LyricTimeTab_propertyDecorated_property():
     assert standard_time_tab.minutes_seconds_seperator == standard_time_tab._minutes_seconds_seperator
     assert standard_time_tab.seconds_milliseconds_seperator == standard_time_tab._seconds_milliseconds_seperator
 
+
+
+def test_LyricTimeTab_calculation():
+    """
+    Test the calculation method of LyricTimeTab class.
+
+    测试 LyricTimeTab 类的计算方法。
+    """
+    standard_time_tab = LyricTimeTab(standard_init_time_tab, ("normal", "None"))
+
+    standard_time_tab += 1
+    print()
+
+
+    print(standard_time_tab.time_stamp)
+    assert standard_time_tab.time_stamp == datetime.timedelta(seconds=1)
 
 
 

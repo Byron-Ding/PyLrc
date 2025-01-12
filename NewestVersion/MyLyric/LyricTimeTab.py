@@ -475,19 +475,34 @@ class LyricTimeTab(Comparable, Calculable):
                      "LyricTimeTab"]
                      ) -> Callable[[Any, Any], "LyricTimeTab"]:
             @wraps(operator)
-            def decorated_operator(obj_instance, other):
+            def decorated_operator(obj_instance: "LyricTimeTab", other):
                 # 调用的时候一定要加入self的参数，self在这里不会被自动传入
                 # 实例化类
                 if isinstance(other, LyricTimeTab):
                     other: LyricTimeTab
-                    return operator(obj_instance, other.time_stamp)
+                    # 复制之后再加，不改变原来的值
+                    returned_instance: "LyricTimeTab" = copy.deepcopy(obj_instance)
+                    returned_instance = operator(returned_instance, other.time_stamp)
+                    # 不重新初始化，初始化只针对 current_time_tab
+
+                    return returned_instance
 
                 # 可以和 int 或者 float 加减乘除
                 elif isinstance(other, (int, float)):
-                    return operator(obj_instance, other)
+                    # 复制之后再加，不改变原来的值
+                    returned_instance: "LyricTimeTab" = copy.deepcopy(obj_instance)
+                    returned_instance = operator(returned_instance, datetime.timedelta(seconds=other))
+                    # 不重新初始化，初始化只针对 current_time_tab
+
+                    return returned_instance
 
                 elif isinstance(other, datetime.timedelta):
-                    return operator(obj_instance, other.total_seconds())
+                    # 复制之后再加，不改变原来的值
+                    returned_instance: "LyricTimeTab" = copy.deepcopy(obj_instance)
+                    returned_instance = operator(returned_instance, other)
+                    # 不重新初始化，初始化只针对 current_time_tab
+
+                    return returned_instance
 
                 else:
                     raise TypeError("LyricTimeTab is not valid for" + self.operator_name +
@@ -497,53 +512,51 @@ class LyricTimeTab(Comparable, Calculable):
 
     @__OperatorIntFloadGuard(operator_name="+")
     def __add__(self, other: Any) -> Any:
-        # 复制之后再加，不改变原来的值
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp += datetime.timedelta(seconds=other)
+        self.time_stamp += other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="-")
     def __sub__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp -= datetime.timedelta(seconds=other)
+        self.time_stamp -= other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="*")
     def __mul__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp *= datetime.timedelta(seconds=other)
+        self.time_stamp *= other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="/")
     def __truediv__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp /= datetime.timedelta(seconds=other)
+        self.time_stamp /= other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="//")
     def __floordiv__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp //= datetime.timedelta(seconds=other)
+        self.time_stamp //= other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="%")
     def __mod__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp %= datetime.timedelta(seconds=other)
+        self.time_stamp %= other
 
-        return returned_time_stamp
+        # 在装饰器里面已经重新初始化 + 拷贝了
+        return self
 
     @__OperatorIntFloadGuard(operator_name="**")
     def __pow__(self, other: Any) -> Any:
-        returned_time_stamp: "LyricTimeTab" = copy.deepcopy(self)
-        returned_time_stamp.time_stamp **= datetime.timedelta(seconds=other)
+        self.time_stamp **= other
 
-        return returned_time_stamp
+        return self
 
     def __float__(self) -> Any:
         return self.time_stamp.total_seconds()

@@ -5,8 +5,8 @@ from typing import Optional, Self
 from typing import Union
 from typing import Pattern, Match
 from typing import Callable
-from .LyricTimeTab import LyricTimeTab
-from .LyricLineContent import LyricLineContent
+from .Lyric_Time_tab import Lyric_Time_tab
+from .Lyric_line_content import Lyric_line_content
 from .Lyric_line import Lyric_line
 
 
@@ -51,12 +51,12 @@ class Lyric_file:
     # 分为两组
     # groups: (左括号，分，冒号，秒，冒号或者点，毫秒，右括号)[时间标签组]，歌词内容[歌词内容组]
     # 例如：[00:00.00]歌词内容
-    LRC_CONTENT_REGEX: Pattern = re.compile(r"^(?P<_current_time_tab>((\[)?(\d+)(:)(\d+)([.:])(\d*)(])?)*)"
+    LRC_CONTENT_REGEX: Pattern = re.compile(r"^(?P<time_tab>((\[)?(\d+)(:)(\d+)([.:])(\d*)(])?)*)"
                                             r"(?P<lrc_content>.*)$")
 
     # 标准格式
     INFORMATION_TAG_REGEX_STANDARD: Pattern = re.compile(r"^(\[)(?P<tag>[a-zA-Z].*):(?P<tag_content>.*)(])$")
-    LRC_CONTENT_REGEX_STANDARD: Pattern = re.compile(r"^(?P<_current_time_tab>((\[)(\d{2})(:)(\d{2})(\.)(\d{2})(])?)*)"
+    LRC_CONTENT_REGEX_STANDARD: Pattern = re.compile(r"^(?P<time_tab>((\[)(\d{2})(:)(\d{2})(\.)(\d{2})(])?)*)"
                                                      r"(?P<lrc_content>.*)$")
 
     EACH_PROUNUNCIATION_GROUP_IN_KANA_REGEX: Pattern = re.compile(r"(?P<all_group>"
@@ -301,12 +301,12 @@ class Lyric_file:
         # 用正则表达式匹配，获取时间和歌词（时间可能为空）
         each_line_match = self.LRC_CONTENT_REGEX.match(each_line)
 
-        time: str | Optional[LyricTimeTab]
+        time: str | Optional[Lyric_Time_tab]
         # 获取时间
-        time: str = each_line_match.group("_current_time_tab")
+        time: str = each_line_match.group("time_tab")
 
         # 分离时间标签，可能有多个时间标签，所以是列表
-        time_str_list: list[tuple[str]] = LyricTimeTab.TIME_TAB_EACH_LINE_VERY_LOOSE_REGREX.findall(time)
+        time_str_list: list[tuple[str]] = Lyric_Time_tab.TIME_TAB_EACH_LINE_VERY_LOOSE_REGREX.findall(time)
 
         # 因为有括号，所以是元组的列表，需要转为字符串的列表
         time_str_list: list[str] = ["".join(each_time_tab_element_tuple)
@@ -316,21 +316,22 @@ class Lyric_file:
         lrc: str = each_line_match.group("lrc_content")
 
         # 转为类
-        lrc_obj: LyricLineContent = LyricLineContent(lrc, separation_mode=mode)
+        lrc_obj: Lyric_line_content = Lyric_line_content(lrc,
+                                                         separation_mode=mode)
 
         # 判断时间 是否为空
         if time_str_list:
-            time_obj: Optional[list[LyricTimeTab]] = []
+            time_obj: Optional[list[Lyric_Time_tab]] = []
             # 转为类的列表
             for each_time in time_str_list:
                 # 转为类
-                each_time_obj: Optional[LyricTimeTab] = LyricTimeTab(each_time, mode)
+                each_time_obj: Optional[Lyric_Time_tab] = Lyric_Time_tab(each_time, mode)
                 # 放入一级歌词列表中
                 time_obj.append(each_time_obj)
 
         # 如果为空，转为 None
         else:
-            time_obj: Optional[list[LyricTimeTab]] = None
+            time_obj: Optional[list[Lyric_Time_tab]] = None
 
         # 包装成类
         each_lyric_line_obj: Lyric_line = Lyric_line(time_obj, [lrc_obj])
@@ -344,7 +345,7 @@ class Lyric_file:
     @staticmethod
     def merge_cross_line_lyrics_static(secondary_lyric_list: list[Lyric_line]
                                        ) -> list[Any,
-                                                 LyricLineContent]:
+                                                 Lyric_line_content]:
         """
         中文：
         合并跨行歌词
@@ -361,7 +362,7 @@ class Lyric_file:
             raise ValueError("The first line of lyrics does not have a time tag")
 
         # 返回的列表
-        return_list: list[Any, LyricLineContent] = []
+        return_list: list[Any, Lyric_line_content] = []
 
         # 逐行处理
         for each_line_list in secondary_lyric_list:
@@ -402,8 +403,8 @@ class Lyric_file:
     def convert_primary_lyric_list_to_secondary_list_classmethod(cls,
                                                                  lrc_lines: str | list[str],
                                                                  mode: str
-                                                                 ) -> list[list[LyricTimeTab,
-                                                                                LyricLineContent]]:
+                                                                 ) -> list[list[Lyric_Time_tab,
+                                                                                Lyric_line_content]]:
         """
             中文：
             在纯歌词内容的字符串或列表中，分离时间标签和歌词内容
@@ -415,10 +416,10 @@ class Lyric_file:
             :param mode: 时间标签检查严格度，可选值为 "strict", "normal", "loose" 和 “very_loose”
                 || The strictness of the time tag check,
                  the optional values are "strict", "normal", "loose" and "very_loose"
-            :return: list[list[LyricTimeTab, [str]]]
+            :return: list[list[Lyric_Time_tab, [str]]]
         """
         # 新的空列表
-        output_list: list[str | list[LyricTimeTab], LyricLineContent]
+        output_list: list[str | list[Lyric_Time_tab], Lyric_line_content]
 
         # 如果是字符串，按行分割，去除空行（含只有空白字符的行）
         if isinstance(lrc_lines, str):
@@ -438,17 +439,17 @@ class Lyric_file:
             # 用正则表达式匹配，获取时间和歌词（时间可能为空）
             each_line_match = cls.LRC_CONTENT_REGEX.match(lrc_lines)
 
-            time: str | Optional[LyricTimeTab]
+            time: str | Optional[Lyric_Time_tab]
             # 获取时间
             time = each_line_match.group("time")
             # 获取歌词
             lrc: str = each_line_match.group("lrc")
 
-            lrc: LyricLineContent = LyricLineContent(lrc)
+            lrc: Lyric_line_content = Lyric_line_content(lrc)
 
             # 判断时间 是否为空
             if time:
-                time = LyricTimeTab(time, mode)
+                time = Lyric_Time_tab(time, mode)
             # 否则转为None
             else:
                 time = None
@@ -580,7 +581,7 @@ class Lyric_file:
 
         :param input_lyric_lines: list[Lyric_line]
         :param separator: str
-        :return: list[list[LyricTimeTab, str]]
+        :return: list[list[Lyric_Time_tab, str]]
         """
 
         # 新的列表
@@ -644,7 +645,7 @@ class Lyric_file:
         [00:03.00] 我的家\n那里有森林煤矿
 
         :param separator: str
-        :return: list[list[LyricTimeTab | str, str]]
+        :return: list[list[Lyric_Time_tab | str, str]]
         """
 
         # 调用静态方法
@@ -674,7 +675,7 @@ class Lyric_file:
         English: \n
         Convert the secondary list of lyrics into a primary list.
 
-        :param input_lyric_lines: list[list[LyricTimeTab | str, str]]
+        :param input_lyric_lines: list[list[Lyric_Time_tab | str, str]]
         原始的二级列表
         Original secondary list
         :param len_of_millisecond_output: int
@@ -724,8 +725,8 @@ class Lyric_file:
                                           last_line_time_tab_limit: float = 0,
                                           ignore_empty_lyric: bool = False,
                                           ) -> list[
-        list[Optional[LyricTimeTab],
-             LyricLineContent]
+        list[Optional[Lyric_Time_tab],
+             Lyric_line_content]
     ]:
         """
         中文：\n
@@ -744,13 +745,13 @@ class Lyric_file:
         # 如果没有时间标签 或者 第一行时间标签为空白字符串，那么就抛出异常
         if self.lrc_lines_secondary[0][0] is None:
             raise ValueError("第一行没有时间标签，无法计算。")
-        elif isinstance(self.lrc_lines_secondary[0][0], LyricTimeTab):
-            if self.lrc_lines_secondary[0][0]._current_time_tab.isspace():
+        elif isinstance(self.lrc_lines_secondary[0][0], Lyric_Time_tab):
+            if self.lrc_lines_secondary[0][0].time_tab.isspace():
                 raise ValueError("第一行时间标签为空白字符串，无法计算。")
 
         # 输出
-        output_list: list[list[Optional[LyricTimeTab],
-                               LyricLineContent]] = []
+        output_list: list[list[Optional[Lyric_Time_tab],
+                               Lyric_line_content]] = []
 
         first_line_after_nonempty_index: int = 1
 
@@ -764,21 +765,21 @@ class Lyric_file:
                 if not line[1].isspace():
                     first_line_after_nonempty_index = index
                     # 时间标签
-                    previous_line_time_tab: LyricTimeTab = line[0]
+                    previous_line_time_tab: Lyric_Time_tab = line[0]
                     break
             # 如果全是空歌词，那么就抛出异常
             else:
                 raise ValueError("All lines are empty lyrics.")
         else:
             # 前一行的时间标签，初始化为第一行的时间标签
-            previous_line_time_tab: LyricTimeTab = self.lrc_lines_secondary[0][0]
+            previous_line_time_tab: Lyric_Time_tab = self.lrc_lines_secondary[0][0]
             output_list.append(self.lrc_lines_secondary[0])
 
         # 当前行歌词
-        # current_line_lyric: Optional[LyricLineContent] = self.lrc_lines_secondary[0][1]
+        # current_line_lyric: Optional[Lyric_line_content] = self.lrc_lines_secondary[0][1]
 
         # 下一行的时间标签，初始化为None
-        # next_line_time_tab: Optional[LyricTimeTab] = None
+        # next_line_time_tab: Optional[Lyric_Time_tab] = None
 
         # 遍历每一行
         # 从第二行开始
@@ -787,8 +788,8 @@ class Lyric_file:
             # 如果没有时间标签 或者 时间标签为空白字符串，跳过，直到找到时间标签为止
             if self.lrc_lines_secondary[0][0] is None:
                 continue
-            elif isinstance(self.lrc_lines_secondary[0][0], LyricTimeTab):
-                if self.lrc_lines_secondary[0][0]._current_time_tab.isspace():
+            elif isinstance(self.lrc_lines_secondary[0][0], Lyric_Time_tab):
+                if self.lrc_lines_secondary[0][0].time_tab.isspace():
                     continue
 
             # 先赋值给 下一行的时间标签临时变量
@@ -804,17 +805,18 @@ class Lyric_file:
                                               * percentage)
 
                 # 转成时间标签字符串
-                translated_time_tab: str = LyricTimeTab.convert_time_tab_to_time_tab_classmethod(
-                    time_stamp=translated_time_tab)
+                translated_time_tab: str = Lyric_Time_tab.convert_time_stamp_to_time_tab_static(
+                    time_stamp=translated_time_tab,
+                )
 
                 # 转为时间标签对象
-                translated_time_tab: LyricTimeTab = LyricTimeTab(
+                translated_time_tab: Lyric_Time_tab = Lyric_Time_tab(
                     tab=translated_time_tab,
                     mode=self.mode
                 )
 
                 # 加入输出列表 [时间标签对象，翻译歌词("")空字符串]
-                output_list.append([translated_time_tab, LyricLineContent("")])
+                output_list.append([translated_time_tab, Lyric_line_content("")])
 
             # 更新前一行的时间标签
             previous_line_time_tab = next_line_time_tab
@@ -831,16 +833,18 @@ class Lyric_file:
                                       * percentage)
 
         # 转成时间标签字符串
-        translated_time_tab: str = LyricTimeTab.convert_time_tab_to_time_tab_classmethod(time_stamp=translated_time_tab)
+        translated_time_tab: str = Lyric_Time_tab.convert_time_stamp_to_time_tab_static(
+            time_stamp=translated_time_tab,
+        )
 
         # 转为时间标签对象
-        translated_time_tab: LyricTimeTab = LyricTimeTab(
+        translated_time_tab: Lyric_Time_tab = Lyric_Time_tab(
             tab=translated_time_tab,
             mode=self.mode
         )
 
         # 加入输出列表 [时间标签对象，翻译歌词(其实默认是空字符串)]
-        output_list.append([translated_time_tab, LyricLineContent("")])
+        output_list.append([translated_time_tab, Lyric_line_content("")])
 
         # 返回输出列表
         return output_list
@@ -869,13 +873,13 @@ class Lyric_file:
         # 如果没有时间标签 或者 第一行时间标签为空白字符串，那么就抛出异常
         if self.lrc_lines_secondary[0][0] is None:
             raise ValueError("第一行没有时间标签，无法计算。")
-        elif isinstance(self.lrc_lines_secondary[0][0], LyricTimeTab):
-            if self.lrc_lines_secondary[0][0]._current_time_tab.isspace():
+        elif isinstance(self.lrc_lines_secondary[0][0], Lyric_Time_tab):
+            if self.lrc_lines_secondary[0][0].time_tab.isspace():
                 raise ValueError("第一行时间标签为空白字符串，无法计算。")
 
         # 输出
-        output_list: list[list[Optional[LyricTimeTab],
-                               LyricLineContent]] = []
+        output_list: list[list[Optional[Lyric_Time_tab],
+                               Lyric_line_content]] = []
 
         first_line_after_nonempty_index: int = 1
 
@@ -888,7 +892,7 @@ class Lyric_file:
                 # 第一行非空歌词的行号
                 if not line[1].isspace():
                     first_line_after_nonempty_index = index
-                    previous_line_time_tab: LyricTimeTab = line[0]
+                    previous_line_time_tab: Lyric_Time_tab = line[0]
                     break
 
             else:
@@ -898,11 +902,11 @@ class Lyric_file:
 
         else:
             # 前一行的时间标签，初始化为第一行的时间标签
-            previous_line_time_tab: LyricTimeTab = self.lrc_lines_secondary[0][0]
+            previous_line_time_tab: Lyric_Time_tab = self.lrc_lines_secondary[0][0]
             output_list.append(self.lrc_lines_secondary[0])
 
         # 下一行的时间标签，初始化为None
-        next_line_time_tab: Optional[LyricTimeTab]
+        next_line_time_tab: Optional[Lyric_Time_tab]
 
         # 遍历每一行
         # 从第二行开始
@@ -913,8 +917,8 @@ class Lyric_file:
             # 如果没有时间标签 或者 时间标签为空白字符串，跳过，直到找到时间标签为止
             if self.lrc_lines_secondary[0][0] is None:
                 continue
-            elif isinstance(self.lrc_lines_secondary[0][0], LyricTimeTab):
-                if self.lrc_lines_secondary[0][0]._current_time_tab.isspace():
+            elif isinstance(self.lrc_lines_secondary[0][0], Lyric_Time_tab):
+                if self.lrc_lines_secondary[0][0].time_tab.isspace():
                     continue
 
             # 先赋值给 下一行的时间标签临时变量
@@ -928,17 +932,18 @@ class Lyric_file:
                                               * percentage)
 
                 # 转成时间标签字符串
-                translated_time_tab: str = LyricTimeTab.convert_time_tab_to_time_tab_classmethod(
-                    time_stamp=translated_time_tab)
+                translated_time_tab: str = Lyric_Time_tab.convert_time_stamp_to_time_tab_static(
+                    time_stamp=translated_time_tab,
+                )
 
                 # 转为时间标签对象
-                translated_time_tab: LyricTimeTab = LyricTimeTab(
+                translated_time_tab: Lyric_Time_tab = Lyric_Time_tab(
                     tab=translated_time_tab,
                     mode=self.mode
                 )
 
                 # 加入输出列表 [时间标签对象，翻译歌词("")空字符串]
-                output_list.append([translated_time_tab, LyricLineContent("")])
+                output_list.append([translated_time_tab, Lyric_line_content("")])
 
             # 更新前一行的时间标签
             previous_line_time_tab = next_line_time_tab
@@ -958,16 +963,18 @@ class Lyric_file:
                                       * percentage)
 
         # 转成时间标签字符串
-        translated_time_tab: str = LyricTimeTab.convert_time_tab_to_time_tab_classmethod(time_stamp=translated_time_tab)
+        translated_time_tab: str = Lyric_Time_tab.convert_time_stamp_to_time_tab_static(
+            time_stamp=translated_time_tab,
+        )
 
         # 转为时间标签对象
-        translated_time_tab: LyricTimeTab = LyricTimeTab(
+        translated_time_tab: Lyric_Time_tab = Lyric_Time_tab(
             tab=translated_time_tab,
             mode=self.mode
         )
 
         # 加入输出列表 [时间标签对象，翻译歌词(其实默认是空字符串)]
-        output_list.append([translated_time_tab, LyricLineContent("")])
+        output_list.append([translated_time_tab, Lyric_line_content("")])
 
         self.lrc_lines_secondary = output_list
 
@@ -1108,7 +1115,7 @@ class Lyric_file:
         return output_list
 
 
-    def extract_kana_tag(self) -> list[list[list[LyricLineContent, int]]]:
+    def extract_kana_tag(self) -> list[list[list[Lyric_line_content, int]]]:
         CJKV_list = self.get_all_chinese_and_chu_nom_and_chinese_radical_list_each_line()
 
         # 统计每行有多少个CJKV字符
@@ -1129,7 +1136,7 @@ class Lyric_file:
 
         # 输出列表
         # 输出的长发音列表，发音列表(行的长度，就是那个[])
-        output_list: list[list[list[LyricLineContent, int]]] = []
+        output_list: list[list[list[Lyric_line_content, int]]] = []
         # 对应每一行
         for each_line_CJKV_index, \
             each_line_pronunciation_list, \
@@ -1139,8 +1146,8 @@ class Lyric_file:
                        CJKV_count_each_line):
 
             # 直接调用方法
-            each_line_pronunciation_full_list:  list[list[LyricLineContent, int]]\
-                = LyricLineContent.extend_pronunciation_list(
+            each_line_pronunciation_full_list:  list[list[Lyric_line_content, int]]\
+                = Lyric_line_content.extend_pronunciation_list(
                 each_line_CJKV_index,
                 each_line_pronunciation_list,
                 character_number_each_line
@@ -1174,7 +1181,7 @@ class Lyric_file:
 
             for each_matched_pronunciation_group in matched_pronunciation_groups:
                 # [读音，长度]
-                each_small_list: list[str, int] = [each_matched_pronunciation_group.group("pronunciation_line_list"),
+                each_small_list: list[str, int] = [each_matched_pronunciation_group.group("pronunciation"),
                                                    each_matched_pronunciation_group.group("length")]
                 kana_tag_list.append(each_small_list)
 
@@ -1196,11 +1203,11 @@ class Lyric_file:
 
         return output_list
 
-    def update_pronunciation(self, pronunciation_each_line: list[list[list[LyricLineContent, int]]]) -> Self:
+    def update_pronunciation(self, pronunciation_each_line: list[list[list[Lyric_line_content, int]]]) -> Self:
         # 逐行更新
         for each_line, each_line_pronunciation in zip(self.lrc_lines_secondary, pronunciation_each_line):
             each_line: Lyric_line
-            each_line_pronunciation: list[list[LyricLineContent, int]]
+            each_line_pronunciation: list[list[Lyric_line_content, int]]
 
             # 更新
             each_line.update_pronunciation(each_line_pronunciation)
@@ -1225,8 +1232,8 @@ if __name__ == '__main__':
 
     a = Lyric_file.LRC_CONTENT_REGEX.match('[00:00.00][10:12:22]ブルーバード - 生物股长 (いきものがかり)')
 
-    print(b := a.group("_current_time_tab"))
-    c = LyricTimeTab.TIME_TAB_EACH_LINE_VERY_LOOSE_REGREX.match(b)
+    print(b := a.group("time_tab"))
+    c = Lyric_Time_tab.TIME_TAB_EACH_LINE_VERY_LOOSE_REGREX.match(b)
     print(c)
 
     Lyric_file_Test_File_青鸟 = Lyric_file(content)

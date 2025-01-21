@@ -1,20 +1,20 @@
 from typing import Optional, Self
 from .LyricTimeTab import LyricTimeTab
-from .Lyric_line_content import Lyric_line_content
+from .LyricLineContent import LyricLineContent
 
 
 class Lyric_line:
 
     def __init__(self,
                  time_tab_list: Optional[list[LyricTimeTab]],
-                 lyric_content_list: list[Lyric_line_content]):
+                 lyric_content_list: list[LyricLineContent]):
 
         # 歌词标签，用于适应多行合并的歌词
         # 自动排序
         self.time_tabs: Optional[list[LyricTimeTab]] = sorted(time_tab_list)
 
         # 向后兼容，用列表存储
-        self.lyric_contents: list[Lyric_line_content] = lyric_content_list
+        self.lyric_contents: list[LyricLineContent] = lyric_content_list
 
     def __str__(self):
         # 两个列表，一个是时间标签，一个是歌词内容
@@ -123,8 +123,7 @@ class Lyric_line:
         # 遍历时间标签
         for time_tab in self.time_tabs:
             # 用于输出字符串
-            time_tab_str = time_tab.convert_to_time_tab(len_of_millisecond_output=len_of_millisecond_output,
-                                                        seperator=seperator_each_line)
+            time_tab_str = time_tab.convert_to_time_tab_base_on_inner_param()
             output_str += time_tab_str
 
         for lyric_content in self.lyric_contents:
@@ -166,7 +165,7 @@ class Lyric_line:
         # 逐个拼接
         for each_lyric_content in self.lyric_contents:
             each_lyric_content_CJKV: list[list[str, int]] \
-                = each_lyric_content.get_all_chinese_and_chu_nom_and_chinese_radical()
+                = each_lyric_content.get_all_cjkv()
 
             output_list += each_lyric_content_CJKV
 
@@ -179,7 +178,7 @@ class Lyric_line:
 
         return output_str
 
-    def update_pronunciation(self, pronunciation_each_line: list[list[Lyric_line_content, int]]):
+    def update_pronunciation(self, pronunciation_each_line: list[list[LyricLineContent, int]]):
         if len(self.lyric_contents) == 1:
             self.lyric_contents[0].update_pronunciation_list(pronunciation_each_line)
         else:
@@ -196,7 +195,7 @@ if __name__ == '__main__':
     time_tab5 = LyricTimeTab("[00:04.00]")
 
     # 新定义几个歌词内容
-    lyric_content1 = Lyric_line_content("歌词1")
+    lyric_content1 = LyricLineContent("歌词1")
 
     # 打乱顺序，组成乱序列表，用于测试
     time_tabs = [time_tab1, time_tab3, time_tab2, time_tab5, time_tab4]

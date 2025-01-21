@@ -20,17 +20,17 @@ from MyLyric import LyricTimeTab
 from MyLyric import LyricCharacter
 from MyLyric import Lyric_file
 from MyLyric import Lyric_line
-from MyLyric import Lyric_line_content
+from MyLyric import LyricLineContent
 ```
 
 * Lyric_file is for the total lyric file analysising
   
 * LyricCharacter is for each character, with pronounciation
 
-* Lyric_line is LyricTimeTab + Lyric_line_content 
+* Lyric_line is LyricTimeTab + LyricLineContent 
 > Coorespond to each line of the file
 
-* Lyric_line_content is formed by lyric characters with other information
+* LyricLineContent is formed by lyric characters with other information
 > The cooresponding part is the lyric after [mm:ss:mm]
 
 * LyricTimeTab is the time tab

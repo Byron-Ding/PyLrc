@@ -16,7 +16,7 @@ def var_type_guard(var: Any, var_type: tuple[Any, ...]) -> TypeGuard[Any]:
             break
     # 没有break说明没有找到对应的类型
     else:
-        raise TypeError(var + ' must be one of ' + str(var_type))
+        raise TypeError(str(var) + ' must be one of ' + str(var_type))
 
     # break 说明找到了对应的类型，返回 True
     return True
@@ -26,6 +26,12 @@ def int_leq_0_guard(var: int) -> TypeGuard[int]:
         return True
     else:
         raise ValueError(str(var) + ' must be large than 0')
+
+def str_len_eq_1_guard(var: str) -> TypeGuard[str]:
+    if len(var) == 1:
+        return True
+    else:
+        raise ValueError(var + ' must be a string with length of 1')
 
 
 class Comparable(Protocol):

@@ -16,24 +16,24 @@ import MyLyric
 
 There are 5 class under the Library.
 ```python
-from MyLyric import Lyric_Time_tab
-from MyLyric import Lyric_character
+from MyLyric import LyricTimeTab
+from MyLyric import LyricCharacter
 from MyLyric import Lyric_file
 from MyLyric import Lyric_line
-from MyLyric import Lyric_line_content
+from MyLyric import LyricLineContent
 ```
 
 * Lyric_file is for the total lyric file analysising
   
-* Lyric_character is for each character, with pronounciation
+* LyricCharacter is for each character, with pronounciation
 
-* Lyric_line is Lyric_Time_tab + Lyric_line_content 
+* Lyric_line is LyricTimeTab + LyricLineContent 
 > Coorespond to each line of the file
 
-* Lyric_line_content is formed by lyric characters with other information
+* LyricLineContent is formed by lyric characters with other information
 > The cooresponding part is the lyric after [mm:ss:mm]
 
-* Lyric_Time_tab is the time tab
+* LyricTimeTab is the time tab
 > The cooresponding part is [mm:ss:mm]
 
 A stand lyric format is like

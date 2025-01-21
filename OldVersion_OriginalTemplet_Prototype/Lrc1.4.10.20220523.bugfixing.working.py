@@ -850,7 +850,7 @@ class Lyric_file:
             reflaction.append(pure_lyric)
             
             for lyric_line_list1 in lyirc:
-                time_tab = lyric_line_list1[0]
+                _current_time_tab = lyric_line_list1[0]
                 if lyric_line_list1[-1] == pure_lyric:
                     pass
         '''
@@ -1277,7 +1277,7 @@ class Lyric_file:
             except IndexError:
                 break
 
-            this_time_stamp = This_time_tab.convert_to_time_stamp(len_of_millisecond=This_time_tab.len_of_millisecond)
+            this_time_stamp = This_time_tab.convert_to_time_stamp(len_of_millisecond=This_time_tab.min_len_of_millisecond)
             # 下段时间
             try:
                 # ③如果有开头，又是第一次循环，则设定headline。
@@ -1292,26 +1292,26 @@ class Lyric_file:
                 Next_time_tab = Time_tab(lyric_text[clc_line][0])
                 out_of_range = True
 
-            next_time_stamp = Next_time_tab.convert_to_time_stamp(len_of_millisecond=Next_time_tab.len_of_millisecond)
+            next_time_stamp = Next_time_tab.convert_to_time_stamp(len_of_millisecond=Next_time_tab.min_len_of_millisecond)
 
             # 解决小数位数前后两项不一样
-            if This_time_tab.len_of_millisecond == Next_time_tab.len_of_millisecond:
-                len_of_millisecond = This_time_tab.len_of_millisecond
+            if This_time_tab.min_len_of_millisecond == Next_time_tab.min_len_of_millisecond:
+                len_of_millisecond = This_time_tab.min_len_of_millisecond
 
-            elif This_time_tab.len_of_millisecond > Next_time_tab.len_of_millisecond:
+            elif This_time_tab.min_len_of_millisecond > Next_time_tab.min_len_of_millisecond:
                 next_time_stamp = int(str(next_time_stamp).ljust(
-                    This_time_tab.len_of_millisecond,
+                    This_time_tab.min_len_of_millisecond,
                     '0'))
 
-                len_of_millisecond = This_time_tab.len_of_millisecond
+                len_of_millisecond = This_time_tab.min_len_of_millisecond
 
-            elif This_time_tab.len_of_millisecond < Next_time_tab.len_of_millisecond:
+            elif This_time_tab.min_len_of_millisecond < Next_time_tab.min_len_of_millisecond:
                 #
                 this_time_stamp = int(str(this_time_stamp).ljust(
-                    Next_time_tab.len_of_millisecond,
+                    Next_time_tab.min_len_of_millisecond,
                     '0'))
 
-                len_of_millisecond = Next_time_tab.len_of_millisecond
+                len_of_millisecond = Next_time_tab.min_len_of_millisecond
 
             # ②超出范围（最后一项+2.5s（可增加参数可调））
             if out_of_range:
